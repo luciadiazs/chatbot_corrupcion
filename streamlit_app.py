@@ -14,7 +14,7 @@ client = OpenAI(
 st.set_page_config(page_title="Chatbot Corrupción 💬", layout="centered")
 
 with st.sidebar:
-    st.title('Interactive Education Database')
+    st.title('Chatbot Corrupción')
     st.markdown('''
     ## Sobre este Chatbot
     Este es un chatbot que te permite conversar con los informes de la contraloría
@@ -29,7 +29,7 @@ def load_chunks_from_json(input_file='docs_chunks.json'):
     return docs_chunks
 
 # Ahora puedes llamar a la función después de su definición
-docs_chunks = load_chunks_from_json('docs_chunks_spotlight.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
+docs_chunks = load_chunks_from_json('docs_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
 
 def main():
     st.header("Conversa con los informes de la contraloría💬")

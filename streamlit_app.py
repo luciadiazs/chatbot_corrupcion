@@ -11,14 +11,13 @@ client = OpenAI(
 )
 
 # Configuración de Streamlit
-st.set_page_config(page_title="Interactive Education Database 💬", layout="centered")
+st.set_page_config(page_title="Chatbot Corrupción 💬", layout="centered")
 
 with st.sidebar:
     st.title('Interactive Education Database')
     st.markdown('''
-    ## About this bot
-    This is a chatbot that allows you to talk to the PDFs used for the  Education, English Learning and Youth in Perú report.
-    Here are the PDFs loaded in this database: https://drive.google.com/drive/folders/15HUOFZtQpWB9DGZNZuSL4ej7Mr3nC3Ks?usp=sharing
+    ## Sobre este Chatbot
+    Este es un chatbot que te permite conversar con los informes de la contraloría
                 ''')
 
 load_dotenv()
@@ -33,7 +32,7 @@ def load_chunks_from_json(input_file='docs_chunks.json'):
 docs_chunks = load_chunks_from_json('docs_chunks_spotlight.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
 
 def main():
-    st.header("Chat with the Peruvian Education Database 💬")
+    st.header("Conversa con los informes de la contraloría💬")
 
 # Define el system_prompt
 system_prompt = "You are an expert in the documents provided, which are documents pertaining to the state of Peruvian education and youth. Answer the questions based on the data in the documents."

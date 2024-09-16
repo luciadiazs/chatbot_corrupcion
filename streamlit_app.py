@@ -17,7 +17,7 @@ with st.sidebar:
     st.title('Chatbot Corrupción')
     st.markdown('''
     ## Sobre este Chatbot
-    Este es un chatbot que te permite conversar con los informes de la contraloría
+    Este es un chatbot que te permite conversar con los informes de auditoría sobre corrupción en gobiernos subnacionales en Perú 2016-2022.
                 ''')
 
 load_dotenv()
@@ -40,7 +40,7 @@ system_prompt = "You are an expert in audit reports on corruption in subnational
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-prompt = st.text_input("Your inquiry:", "")
+prompt = st.text_input("Tu pregunta:", "")
 
 
 openai.api_key = st.secrets['openai_key']
@@ -82,12 +82,12 @@ def send_question_to_openai(question, docs_chunks):
     # Return the message content directly
     return response.choices[0].message.content
 
-if st.button("Send"):
+if st.button("Enviar"):
     if prompt:  # Check if the prompt is not empty
         user_message = {"role": "user", "content": prompt}
         st.session_state.messages.append(user_message)
 
-        with st.spinner("Generating answer..."):
+        with st.spinner("Generando respuesta..."):
             response_text = send_question_to_openai(prompt, docs_chunks)
             if response_text:  # Check if the response_text is not None or empty
                 assistant_message = {"role": "assistant", "content": response_text}
@@ -98,9 +98,9 @@ if st.button("Send"):
 # Display the messages
 for index, message in enumerate(st.session_state.messages):
     if message["role"] == "user":
-        st.text_area("Question", value=message["content"], height=75, disabled=True, key=f"user_{index}")
+        st.text_area("Pregunta", value=message["content"], height=75, disabled=True, key=f"user_{index}")
     elif message["role"] == "assistant":  # Ensure this is an 'elif' to check specifically for "assistant" role
-        st.text_area("Answer", value=message["content"], height=100, disabled=True, key=f"assistant_{index}")
+        st.text_area("Respuesta", value=message["content"], height=100, disabled=True, key=f"assistant_{index}")
 
 
 if __name__ == "__main__":

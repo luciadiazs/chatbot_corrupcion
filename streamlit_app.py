@@ -35,7 +35,7 @@ def main():
     st.header("Conversa con los informes de la contraloría💬")
 
 # Define el system_prompt
-system_prompt = "You are an expert in the documents provided, which are documents pertaining to the state of Peruvian education and youth. Answer the questions based on the data in the documents."
+system_prompt = "You are an expert in audit reports on corruption in subnational governments in Peru. Answer the questions based on the data in the documents provided."
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []

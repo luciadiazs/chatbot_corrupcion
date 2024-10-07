@@ -6,6 +6,7 @@
 !results/
 !docs/
 !paper/
+!data/
 
 # And don't ignore these files
 !README.md
@@ -18,10 +19,7 @@
 !results/**
 !docs/**
 !paper/**
-
-# Explicitly ignore data folder and APIs.txt
-data/
-APIs.txt
+!data/**
 
 # Common files to ignore
 *.pyc

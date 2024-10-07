@@ -1,0 +1,43 @@
+# Ignore everything
+*
+
+# But don't ignore these directories
+!src/
+!results/
+!docs/
+!paper/
+
+# And don't ignore these files
+!README.md
+!requirements.txt
+!.gitignore
+
+# Recursively allow files under the directories we don't ignore
+!src/**
+!results/**
+!docs/**
+!paper/**
+
+# Explicitly ignore data folder and APIs.txt
+data/
+APIs.txt
+
+# Common files to ignore
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.ipynb_checkpoints
+.DS_Store
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo

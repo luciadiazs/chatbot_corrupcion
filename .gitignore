@@ -11,6 +11,7 @@
 !README.md
 !requirements.txt
 !.gitignore
+!streamlit_app.py
 
 # Recursively allow files under the directories we don't ignore
 !src/**

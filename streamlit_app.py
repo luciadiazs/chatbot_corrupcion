@@ -23,7 +23,7 @@ with st.sidebar:
 load_dotenv()
 
 # Asegúrate de que esta definición esté antes de su llamada
-def load_chunks_from_json(input_file='data/docs_chunks.json'):
+def load_chunks_from_json(input_file='data/processed/docs_chunks.json'):
     with open(input_file, 'r', encoding='utf-8') as f:
         docs_chunks = json.load(f)
     return docs_chunks

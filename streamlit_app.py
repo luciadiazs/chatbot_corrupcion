@@ -29,7 +29,7 @@ def load_chunks_from_json(input_file='data/processed/docs_chunks.json'):
     return docs_chunks
 
 # Ahora puedes llamar a la función después de su definición
-docs_chunks = load_chunks_from_json('data/docs_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
+docs_chunks = load_chunks_from_json('./data/docs_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
 
 def main():
     st.header("Conversa con los informes de la contraloría💬")

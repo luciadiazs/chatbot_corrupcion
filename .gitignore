@@ -6,7 +6,7 @@
 !results/
 !docs/
 !paper/
-!data/processed
+!data/
 
 # And don't ignore these files
 !README.md
@@ -19,7 +19,7 @@
 !results/**
 !docs/**
 !paper/**
-!data/processed/**
+!data/**
 
 # Common files to ignore
 *.pyc

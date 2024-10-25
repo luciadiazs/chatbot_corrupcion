@@ -76,7 +76,7 @@ def send_question_to_openai(question, docs_chunks):
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": question},
-        temperature=0.1  # Establece un valor bajo para reducir la creatividad y aumentar la precisión
+        "temperature": 0.1  # Establece un valor bajo para reducir la creatividad y aumentar la precisión
         ]
     )
     

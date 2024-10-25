@@ -75,9 +75,9 @@ def send_question_to_openai(question, docs_chunks):
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": question},
-        "temperature": 0.1  # Establece un valor bajo para reducir la creatividad y aumentar la precisión
-        ]
+            {"role": "user", "content": question}
+        ],
+        "temperature": 0.0
     )
     
     # Return the message content directly

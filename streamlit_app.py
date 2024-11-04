@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 import re
 from openai import OpenAI
 
+client = OpenAI(
+  api_key=st.secrets['openai_key'],  # Poner Key
+)
+
 # Configuración de Streamlit
 st.set_page_config(page_title="Chatbot Corrupción 💬", layout="centered")
 

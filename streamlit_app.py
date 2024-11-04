@@ -86,7 +86,9 @@ def main():
             st.markdown(user_input)
 
         with st.spinner("Generando respuesta..."):
-            response_text = send_question_to_openai(user_input, docs_chunks)
+            # Prepara el historial de mensajes para la API (excluyendo el mensaje del sistema)
+            conversation_history = st.session_state.messages[:-1]  # Excluye la entrada actual
+            response_text = send_question_to_openai(user_input, docs_chunks, conversation_history)
             if response_text:
                 assistant_message = {"role": "assistant", "content": response_text}
                 st.session_state.messages.append(assistant_message)
@@ -110,7 +112,7 @@ def find_relevant_chunks(question, docs_chunks, max_chunks=5):
     relevant_chunks = [chunk for _, chunk in sorted(relevance_scores, key=lambda x: x[0], reverse=True)]
     return relevant_chunks[:max_chunks]
 
-def send_question_to_openai(question, docs_chunks):
+def send_question_to_openai(question, docs_chunks, conversation_history):
     # Encuentra los chunks más relevantes para la pregunta
     relevant_chunks = find_relevant_chunks(question, docs_chunks)
     
@@ -120,24 +122,36 @@ def send_question_to_openai(question, docs_chunks):
         for chunk in relevant_chunks
     ])
     
-    # Construye los mensajes a enviar a la API
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "assistant", "content": context_text},
-        {"role": "user", "content": question}
-    ]
-    
+    # Limita el historial a los últimos N mensajes para controlar el número de tokens
+    MAX_HISTORY_MESSAGES = 10
+    trimmed_history = conversation_history[-MAX_HISTORY_MESSAGES:]
+
+    # Construye la lista de mensajes para la API
+    messages = []
+
+    # Añade el mensaje del sistema
+    messages.append({"role": "system", "content": system_prompt})
+
+    # Añade el historial de conversación previo
+    messages.extend(trimmed_history)
+
+    # Añade el contexto (fragmentos relevantes) como mensaje del asistente
+    messages.append({"role": "assistant", "content": context_text})
+
+    # Añade la pregunta actual del usuario
+    messages.append({"role": "user", "content": question})
+
     # Llama a la API de OpenAI con los mensajes actualizados
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages,
         temperature=0,
-        max_tokens=2048,
+        max_tokens=1024,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
     )
-    
+
     # Devuelve la respuesta generada
     return response.choices[0].message.content
 

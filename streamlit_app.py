@@ -85,7 +85,7 @@ def send_question_to_openai(question, docs_chunks):
     
     # Llama a la API de OpenAI con los mensajes actualizados
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=messages,
         temperature=0,
         max_tokens=2048,

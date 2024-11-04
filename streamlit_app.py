@@ -35,57 +35,65 @@ def main():
     st.header("Conversa con los informes de la contraloría💬")
 
 # Define el system_prompt
-system_prompt = "Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responda a las preguntas basándose en los datos de los documentos proporcionados (Informes de Servicios de Control), que proceden de la Contraloría General de La República del Perú. Si no conoce la respuesta a una pregunta, simplemente responda «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»"
+
+system_prompt = """
+Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responde a las preguntas basándote en los datos de los documentos proporcionados (Informes de Servicios de Control) que proceden de la Contraloría General de La República del Perú.
+
+Al elaborar tus respuestas:
+
+- Proporciona información precisa y útil basada en los documentos.
+- Cuando utilices información específica de un documento, menciona el título del documento de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510-informe.txt', se encontró que..."
+- Si no conoces la respuesta a una pregunta, simplemente responde: «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»
+"""
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 prompt = st.text_input("Tu pregunta:", "")
 
-
 def find_relevant_chunks(question, docs_chunks, max_chunks=5):
-    # Tokeniza la pregunta para extraer palabras clave significativas
     question_keywords = set(re.findall(r'\w+', question.lower()))
     relevance_scores = []
 
-    # Calcula un puntaje de relevancia para cada chunk (puede ser el conteo de palabras clave coincidentes)
     for chunk in docs_chunks:
-        chunk_text = chunk["content"].lower()
-        chunk_keywords = set(re.findall(r'\w+', chunk_text))
+        # Combina el título y el contenido para la comparación
+        combined_text = (chunk["title"] + " " + chunk["content"]).lower()
+        chunk_keywords = set(re.findall(r'\w+', combined_text))
         common_keywords = question_keywords.intersection(chunk_keywords)
         relevance_scores.append((len(common_keywords), chunk))
 
-    # Ordena los chunks por su puntaje de relevancia, de mayor a menor
     relevant_chunks = [chunk for _, chunk in sorted(relevance_scores, key=lambda x: x[0], reverse=True)]
-
-    # Retorna los top N chunks más relevantes
     return relevant_chunks[:max_chunks]
 
 def send_question_to_openai(question, docs_chunks):
     # Encuentra los chunks más relevantes para la pregunta
     relevant_chunks = find_relevant_chunks(question, docs_chunks)
     
-    # Construye el prompt completo con el system_prompt y los chunks de texto relevantes
-    prompt_text = system_prompt + "\n\n" + "\n\n".join([chunk["content"] for chunk in relevant_chunks]) + "\n\nQuestion: " + question
-
-    # Llama a la API de OpenAI con el prompt para chat
+    # Construye el contexto incluyendo el título y el contenido de cada chunk
+    context_text = "\n\n".join([
+        f"Título del Documento: {chunk['title']}\nContenido:\n{chunk['content']}"
+        for chunk in relevant_chunks
+    ])
+    
+    # Construye los mensajes a enviar a la API
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "assistant", "content": context_text},
+        {"role": "user", "content": question}
+    ]
+    
+    # Llama a la API de OpenAI con los mensajes actualizados
     response = client.chat.completions.create(
         model="gpt-4",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": question}
-        ],
+        messages=messages,
         temperature=0,
         max_tokens=2048,
         top_p=1,
         frequency_penalty=0,
-        presence_penalty=0,
-        response_format={
-            "type": "text"
-    }   
+        presence_penalty=0
     )
     
-    # Return the message content directly
+    # Devuelve la respuesta generada
     return response.choices[0].message.content
 
 if st.button("Enviar"):

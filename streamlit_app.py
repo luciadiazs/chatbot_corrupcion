@@ -40,7 +40,6 @@ with st.sidebar:
         st.session_state.messages = [{"role": "assistant", "content": "Conversación reiniciada. ¿En qué más puedo ayudarte?"}]
         st.experimental_rerun()
 
-    
 load_dotenv()
 
 def load_chunks_from_json(input_file='data/processed/docs_chunks.json'):
@@ -50,21 +49,22 @@ def load_chunks_from_json(input_file='data/processed/docs_chunks.json'):
 
 docs_chunks = load_chunks_from_json('data/processed/docs_chunks.json')
 
+# Mover system_prompt fuera de main()
+system_prompt = """
+Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responde a las preguntas basándote en los datos de los documentos proporcionados (Informes de Servicios de Control) que proceden de la Contraloría General de La República del Perú.
+
+Al elaborar tus respuestas:
+
+- Proporciona información precisa y útil basada en los documentos.
+- Cuando utilices información específica de un documento, siempre menciona al inicio el número de informe de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510-informe', se encontró que..."
+- Si se te pregunta sobre corrupción en una localidad específica, menciona la información que tengas de todos informes sobre esa localidad. 
+- Si no conoces la respuesta a una pregunta, simplemente responde: «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»
+"""
+
 def main():
     st.title("Chatbot Corrupción 💬")
     st.markdown("Conversa con los informes de la contraloría sobre corrupción en gobiernos subnacionales en Perú (2016-2022).")
     st.write("---")  # Línea divisoria
-
-    system_prompt = """
-    Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responde a las preguntas basándote en los datos de los documentos proporcionados (Informes de Servicios de Control) que proceden de la Contraloría General de La República del Perú.
-
-    Al elaborar tus respuestas:
-
-    - Proporciona información precisa y útil basada en los documentos.
-    - Cuando utilices información específica de un documento, siempre menciona al inicio el número de informe de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510-informe', se encontró que..."
-    - Si se te pregunta sobre corrupción en una localidad específica, menciona la información que tengas de todos informes sobre esa localidad. 
-    - Si no conoces la respuesta a una pregunta, simplemente responde: «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»
-    """
 
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "Hola, soy el Chatbot Corrupción. ¿En qué puedo ayudarte?"}]

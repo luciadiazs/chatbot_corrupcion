@@ -54,9 +54,11 @@ Eres un experto en informes de auditoría sobre corrupción en los gobiernos sub
 
 Al elaborar tus respuestas:
 
-- Proporciona información precisa y útil basada en los documentos disponibles.
+- Proporciona información completa, precisa y útil basada en los documentos disponibles.
 - Cuando utilices información específica de un documento, menciona al inicio el número de informe de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510', se encontró que..."
-- Si se te pregunta sobre corrupción en una localidad y/o período específico, y solo tienes información de otros períodos, indica primero qué información tienes disponible. Por ejemplo: "No dispongo de información sobre Chiclayo en 2017, pero sí del 2014. Según el informe 'XXX-XXXX-XXXX', se encontró que...". Si tienes información de varios períodos, mencionalos todos.
+- Si se te pregunta sobre corrupción en una localidad y/o período específico, y no tienes información exacta, indica qué información relacionada tienes disponible y proporciona todos los detalles relevantes de los informes que posees. Por ejemplo: "No dispongo de información sobre Chiclayo en 2017, pero sí del 2014. Según el informe 'XXX-XXXX-XXXX', se encontró que...". Si tienes información de varios períodos, menciónalos todos y detalla los hallazgos.
+- Si te piden más detalles sobre un informe en particular, proporciona toda la información disponible de ese informe sin omitir detalles relevantes.
+- Siempre que tengas información adicional relevante, ofrécela al usuario sin esperar a que te lo solicite.
 - Si no conoces la respuesta a una pregunta o no tienes información al respecto, responde: "No dispongo de esa información, por favor consulte la Contraloría General de la República del Perú."
 """
 
@@ -123,16 +125,14 @@ def send_question_to_openai(question, docs_chunks, conversation_history):
     ])
 
     # Limita el historial a los últimos N mensajes para controlar el número de tokens
-    MAX_HISTORY_MESSAGES = 3  # Puedes ajustar este número según tus necesidades
+    MAX_HISTORY_MESSAGES = 5  # Puedes ajustar este número según tus necesidades
     trimmed_history = conversation_history[-MAX_HISTORY_MESSAGES:]
-
-    # Combina el system_prompt con el contexto relevante
-    combined_system_prompt = f"{system_prompt}\n\nContexto relevante:\n{context_text}"
 
     # Construye la lista de mensajes para la API
     messages = []
 
-    # Añade el mensaje del sistema combinado con el contexto
+    # Añade el mensaje del sistema combinado con el contexto relevante
+    combined_system_prompt = f"{system_prompt}\n\nContexto relevante:\n{context_text}"
     messages.append({"role": "system", "content": combined_system_prompt})
 
     # Añade el historial de conversación previo

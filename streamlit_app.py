@@ -111,7 +111,7 @@ def find_relevant_chunks(question, docs_chunks, max_chunks=5):
     relevant_chunks = [chunk for _, chunk in sorted(relevance_scores, key=lambda x: x[0], reverse=True)]
     return relevant_chunks[:max_chunks]
 
-def send_question_to_openai(question, docs_chunks, system_prompt):
+def send_question_to_openai(question, docs_chunks):
     # Encuentra los chunks más relevantes para la pregunta
     relevant_chunks = find_relevant_chunks(question, docs_chunks)
     

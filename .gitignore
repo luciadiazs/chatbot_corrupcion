@@ -6,7 +6,7 @@
 !results/
 !docs/
 !paper/
-!data/
+!data/processed
 !.streamlit/
 
 
@@ -21,7 +21,7 @@
 !results/**
 !docs/**
 !paper/**
-!data/**
+!data/processed**
 !.streamlit/**
 
 

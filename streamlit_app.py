@@ -14,15 +14,28 @@ with st.sidebar:
     st.title('Chatbot Corrupción')
     st.markdown('''
     ## Sobre este Chatbot
-    Este es un chatbot que te permite conversar con los informes de auditoría sobre corrupción en gobiernos subnacionales en Perú 2016-2022.
+
+    Bienvenido al **Chatbot Corrupción**, una herramienta interactiva diseñada para facilitar el acceso y comprensión de los informes de auditoría relacionados con casos de corrupción en los gobiernos subnacionales del Perú durante el período **2016-2022**.
+
+    Nuestra base de datos incluye **todos los informes de control** emitidos por la **Contraloría General de la República del Perú** en esos años, proporcionando una cobertura completa y actualizada de las acciones de control realizadas a nivel nacional.
+
+    Utiliza este chatbot para explorar información detallada sobre auditorías, hallazgos y recomendaciones, y para obtener respuestas precisas basadas en los documentos oficiales.
+
+    ---
+    ### Cómo utilizar este Chatbot
+    - **Realiza preguntas claras y específicas** sobre los informes de auditoría.
+    - **Indica localidades o períodos de interés** para obtener información detallada.
+    - **Recuerda que las respuestas se basan en documentos oficiales**, y si no se dispone de cierta información, se te proporcionará orientación para obtenerla.
+
+    ---
     ''')
-    st.markdown('---')
-    st.markdown('Desarrollado por Q-Lab - Laboratorio de Inteligencia Artificial y Métodos Computacionales en Ciencias Sociales (https://qlab.pucp.edu.pe/)')
-    st.markdown('Contacto: [qlab_csociales@pucp.edu.pe](mailto:qlab_csociales@pucp.edu.pe)')
-    
+    st.markdown('Desarrollado por **Q-Lab** - Laboratorio de Inteligencia Artificial y Métodos Computacionales en Ciencias Sociales ([qlab.pucp.edu.pe](https://qlab.pucp.edu.pe/))')
+    st.markdown('Contacto: ✉️ [qlab_csociales@pucp.edu.pe](mailto:qlab_csociales@pucp.edu.pe)')
+
     if st.button("🗑️ Limpiar conversación"):
         st.session_state.messages = [{"role": "assistant", "content": "Conversación reiniciada. ¿En qué más puedo ayudarte?"}]
         st.experimental_rerun()
+
     
 load_dotenv()
 

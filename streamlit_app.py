@@ -7,7 +7,7 @@ import re  # Importante para las expresiones regulares en find_relevant_chunks
 from openai import OpenAI
 
 client = OpenAI(
-  api_key=os.environ['openai_key'],  # this is also the default, it can be omitted
+  api_key=st.secrets['openai_key'],  # this is also the default, it can be omitted
 )
 
 # Configuración de Streamlit
@@ -35,15 +35,13 @@ def main():
     st.header("Conversa con los informes de la contraloría💬")
 
 # Define el system_prompt
-system_prompt = "You are an expert in audit reports on corruption in subnational governments in Peru. Answer the questions based on the data in the documents provided."
+system_prompt = "You are an expert in audit reports on corruption in subnational governments in Peru. Answer the questions based on the data in the documents provided (Informes de Servicios de Control), which come from la Contraloría General de La República del Perú. If you don't know the answer to a question, simply respond 'I don't have that information available, please consult https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador"
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 prompt = st.text_input("Tu pregunta:", "")
 
-
-openai.api_key = st.secrets['openai_key']
 
 def find_relevant_chunks(question, docs_chunks, max_chunks=5):
     # Tokeniza la pregunta para extraer palabras clave significativas
@@ -71,13 +69,20 @@ def send_question_to_openai(question, docs_chunks):
     prompt_text = system_prompt + "\n\n" + "\n\n".join([chunk["content"] for chunk in relevant_chunks]) + "\n\nQuestion: " + question
 
     # Llama a la API de OpenAI con el prompt para chat
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": question}
         ],
-        "temperature": 0.0
+        temperature=0,
+        max_tokens=2048,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        response_format={
+            "type": "text"
+    }   
     )
     
     # Return the message content directly

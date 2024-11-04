@@ -35,7 +35,7 @@ def main():
     st.header("Conversa con los informes de la contraloría💬")
 
 # Define el system_prompt
-system_prompt = "You are an expert in audit reports on corruption in subnational governments in Peru. Answer the questions based on the data in the documents provided (Informes de Servicios de Control), which come from la Contraloría General de La República del Perú. If you don't know the answer to a question, simply respond 'I don't have that information available, please consult https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador"
+system_prompt = "Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responda a las preguntas basándose en los datos de los documentos proporcionados (Informes de Servicios de Control), que proceden de la Contraloría General de La República del Perú. Si no conoce la respuesta a una pregunta, simplemente responda «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»"
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
@@ -70,7 +70,7 @@ def send_question_to_openai(question, docs_chunks):
 
     # Llama a la API de OpenAI con el prompt para chat
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": question}

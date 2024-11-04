@@ -3,54 +3,81 @@ import json
 import streamlit as st
 import openai
 from dotenv import load_dotenv
-import re  # Importante para las expresiones regulares en find_relevant_chunks
+import re
 from openai import OpenAI
-
-client = OpenAI(
-  api_key=st.secrets['openai_key'],  # this is also the default, it can be omitted
-)
 
 # Configuración de Streamlit
 st.set_page_config(page_title="Chatbot Corrupción 💬", layout="centered")
 
 with st.sidebar:
+    st.image(".streamlit/logo.png", use_column_width=True)
     st.title('Chatbot Corrupción')
     st.markdown('''
     ## Sobre este Chatbot
     Este es un chatbot que te permite conversar con los informes de auditoría sobre corrupción en gobiernos subnacionales en Perú 2016-2022.
-                ''')
-
+    ''')
+    st.markdown('---')
+    st.markdown('Desarrollado por Q-Lab - Laboratorio de Inteligencia Artificial y Métodos Computacionales en Ciencias Sociales (https://qlab.pucp.edu.pe/)')
+    st.markdown('Contacto: [qlab_csociales@pucp.edu.pe](mailto:qlab_csociales@pucp.edu.pe)')
+        if st.button("🗑️ Limpiar conversación"):
+        st.session_state.messages = [{"role": "assistant", "content": "Conversación reiniciada. ¿En qué más puedo ayudarte?"}]
+        st.experimental_rerun()
+    
 load_dotenv()
 
-# Asegúrate de que esta definición esté antes de su llamada
 def load_chunks_from_json(input_file='data/processed/docs_chunks.json'):
     with open(input_file, 'r', encoding='utf-8') as f:
         docs_chunks = json.load(f)
     return docs_chunks
 
-# Ahora puedes llamar a la función después de su definición
-docs_chunks = load_chunks_from_json('data/processed/docs_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
+docs_chunks = load_chunks_from_json('data/processed/docs_chunks.json')
 
 def main():
-    st.header("Conversa con los informes de la contraloría💬")
+    st.title("Chatbot Corrupción 💬")
+    st.markdown("Conversa con los informes de la contraloría sobre corrupción en gobiernos subnacionales en Perú (2016-2022).")
+    st.write("---")  # Línea divisoria
 
-# Define el system_prompt
+    system_prompt = """
+    Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responde a las preguntas basándote en los datos de los documentos proporcionados (Informes de Servicios de Control) que proceden de la Contraloría General de La República del Perú.
 
-system_prompt = """
-Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Responde a las preguntas basándote en los datos de los documentos proporcionados (Informes de Servicios de Control) que proceden de la Contraloría General de La República del Perú.
+    Al elaborar tus respuestas:
 
-Al elaborar tus respuestas:
+    - Proporciona información precisa y útil basada en los documentos.
+    - Cuando utilices información específica de un documento, siempre menciona al inicio el número de informe de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510-informe', se encontró que..."
+    - Si se te pregunta sobre corrupción en una localidad específica, menciona la información que tengas de todos informes sobre esa localidad. 
+    - Si no conoces la respuesta a una pregunta, simplemente responde: «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»
+    """
 
-- Proporciona información precisa y útil basada en los documentos.
-- Cuando utilices información específica de un documento, siempre menciona al inicio el número de informe de donde proviene. Por ejemplo: "Según el informe '002-2017-2-5510-informe', se encontró que..."
-- Si se te pregunta sobre corrupción en una localidad específica, menciona la información que tengas de todos informes sobre esa localidad. 
-- Si no conoces la respuesta a una pregunta, simplemente responde: «No dispongo de esa información, por favor consulte https://buscadorinformes.contraloria.gob.pe/BuscadorCGR/Informes/inicio.html?utm_source=gobpee&utm_medium=otsbuscador&utm_campaign=buscador.»
-"""
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Hola, soy el Chatbot Corrupción. ¿En qué puedo ayudarte?"}]
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
+    # Mostrar los mensajes previos
+    for message in st.session_state.messages:
+        if message["role"] == "assistant":
+            with st.chat_message("assistant"):
+                st.markdown(message["content"])
+        elif message["role"] == "user":
+            with st.chat_message("user"):
+                st.markdown(message["content"])
 
-prompt = st.text_input("Tu pregunta:", "")
+    # Capturar la entrada del usuario
+    if user_input := st.chat_input("Escribe tu pregunta aquí..."):
+        user_message = {"role": "user", "content": user_input}
+        st.session_state.messages.append(user_message)
+
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        with st.spinner("Generando respuesta..."):
+            response_text = send_question_to_openai(user_input, docs_chunks, system_prompt)
+            if response_text:
+                assistant_message = {"role": "assistant", "content": response_text}
+                st.session_state.messages.append(assistant_message)
+
+                with st.chat_message("assistant"):
+                    st.markdown(response_text)
+            else:
+                st.error("No se pudo obtener una respuesta.")
 
 def find_relevant_chunks(question, docs_chunks, max_chunks=5):
     question_keywords = set(re.findall(r'\w+', question.lower()))
@@ -66,7 +93,7 @@ def find_relevant_chunks(question, docs_chunks, max_chunks=5):
     relevant_chunks = [chunk for _, chunk in sorted(relevance_scores, key=lambda x: x[0], reverse=True)]
     return relevant_chunks[:max_chunks]
 
-def send_question_to_openai(question, docs_chunks):
+def send_question_to_openai(question, docs_chunks, system_prompt):
     # Encuentra los chunks más relevantes para la pregunta
     relevant_chunks = find_relevant_chunks(question, docs_chunks)
     
@@ -97,28 +124,5 @@ def send_question_to_openai(question, docs_chunks):
     # Devuelve la respuesta generada
     return response.choices[0].message.content
 
-if st.button("Enviar"):
-    if prompt:  # Check if the prompt is not empty
-        user_message = {"role": "user", "content": prompt}
-        st.session_state.messages.append(user_message)
-
-        with st.spinner("Generando respuesta..."):
-            response_text = send_question_to_openai(prompt, docs_chunks)
-            if response_text:  # Check if the response_text is not None or empty
-                assistant_message = {"role": "assistant", "content": response_text}
-                st.session_state.messages.append(assistant_message)
-            else:
-                st.error("Failed to get a response.")  # Display an error if no response was received
-
-# Display the messages
-for index, message in enumerate(st.session_state.messages):
-    if message["role"] == "user":
-        st.text_area("Pregunta", value=message["content"], height=75, disabled=True, key=f"user_{index}")
-    elif message["role"] == "assistant":  # Ensure this is an 'elif' to check specifically for "assistant" role
-        st.text_area("Respuesta", value=message["content"], height=100, disabled=True, key=f"assistant_{index}")
-
-
 if __name__ == "__main__":
     main()
-
-

@@ -87,7 +87,7 @@ def main():
             st.markdown(user_input)
 
         with st.spinner("Generando respuesta..."):
-            response_text = send_question_to_openai(user_input, docs_chunks, system_prompt)
+            response_text = send_question_to_openai(user_input, docs_chunks)
             if response_text:
                 assistant_message = {"role": "assistant", "content": response_text}
                 st.session_state.messages.append(assistant_message)

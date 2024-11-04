@@ -19,7 +19,8 @@ with st.sidebar:
     st.markdown('---')
     st.markdown('Desarrollado por Q-Lab - Laboratorio de Inteligencia Artificial y Métodos Computacionales en Ciencias Sociales (https://qlab.pucp.edu.pe/)')
     st.markdown('Contacto: [qlab_csociales@pucp.edu.pe](mailto:qlab_csociales@pucp.edu.pe)')
-        if st.button("🗑️ Limpiar conversación"):
+    
+    if st.button("🗑️ Limpiar conversación"):
         st.session_state.messages = [{"role": "assistant", "content": "Conversación reiniciada. ¿En qué más puedo ayudarte?"}]
         st.experimental_rerun()
     

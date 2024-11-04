@@ -115,28 +115,28 @@ def find_relevant_chunks(question, docs_chunks, max_chunks=5):
 def send_question_to_openai(question, docs_chunks, conversation_history):
     # Encuentra los chunks más relevantes para la pregunta
     relevant_chunks = find_relevant_chunks(question, docs_chunks)
-    
+
     # Construye el contexto incluyendo el título y el contenido de cada chunk
     context_text = "\n\n".join([
         f"Título del Documento: {chunk['title']}\nContenido:\n{chunk['content']}"
         for chunk in relevant_chunks
     ])
-    
+
     # Limita el historial a los últimos N mensajes para controlar el número de tokens
-    MAX_HISTORY_MESSAGES = 10
+    MAX_HISTORY_MESSAGES = 3  # Puedes ajustar este número según tus necesidades
     trimmed_history = conversation_history[-MAX_HISTORY_MESSAGES:]
+
+    # Combina el system_prompt con el contexto relevante
+    combined_system_prompt = f"{system_prompt}\n\nContexto relevante:\n{context_text}"
 
     # Construye la lista de mensajes para la API
     messages = []
 
-    # Añade el mensaje del sistema
-    messages.append({"role": "system", "content": system_prompt})
+    # Añade el mensaje del sistema combinado con el contexto
+    messages.append({"role": "system", "content": combined_system_prompt})
 
     # Añade el historial de conversación previo
     messages.extend(trimmed_history)
-
-    # Añade el contexto (fragmentos relevantes) como mensaje del asistente
-    messages.append({"role": "assistant", "content": context_text})
 
     # Añade la pregunta actual del usuario
     messages.append({"role": "user", "content": question})
@@ -146,7 +146,7 @@ def send_question_to_openai(question, docs_chunks, conversation_history):
         model="gpt-3.5-turbo",
         messages=messages,
         temperature=0,
-        max_tokens=1024,
+        max_tokens=1024,  # Ajusta según sea necesario
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0

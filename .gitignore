@@ -7,6 +7,7 @@
 !docs/
 !paper/
 !data/processed
+!data/mapa
 !.streamlit/
 
 
@@ -22,6 +23,7 @@
 !docs/**
 !paper/**
 !data/processed**
+!data/mapa**
 !.streamlit/**
 
 
@@ -38,6 +40,7 @@ env.bak/
 venv.bak/
 .ipynb_checkpoints
 .DS_Store
+*.streamlit/secrets.toml
 
 # IDE specific files
 .vscode/

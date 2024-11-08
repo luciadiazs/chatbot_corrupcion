@@ -5,6 +5,10 @@ import openai
 from dotenv import load_dotenv
 import re
 from openai import OpenAI
+import geopandas as gpd
+import folium
+from streamlit_folium import st_folium
+import unicodedata
 
 client = OpenAI(
   api_key=st.secrets['openai_key'],  # Poner Key

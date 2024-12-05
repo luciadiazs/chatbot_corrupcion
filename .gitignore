@@ -10,7 +10,7 @@
 !data/processed/processed_data.json
 !data/mapa
 !.streamlit/
-
+.gitattributes
 
 # And don't ignore these files
 !README.md

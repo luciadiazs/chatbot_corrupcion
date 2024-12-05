@@ -1,18 +1,14 @@
 # Ignore everything
 *
 
-# But don't ignore these directories
+# Except these directories and files
 !src/
 !results/
 !docs/
 !paper/
-!data/processed
-!data/processed/processed_data.json
-!data/mapa
+!data/
 !.streamlit/
 .gitattributes
-
-# And don't ignore these files
 !README.md
 !requirements.txt
 !.gitignore
@@ -23,10 +19,11 @@
 !results/**
 !docs/**
 !paper/**
-!data/processed**
-!data/mapa**
+!data/**  # This line ensures all data is initially considered
 !.streamlit/**
 
+# Explicitly ignore all files in data/raw
+data/raw/**  # Ignore everything in the raw directory
 
 # Common files to ignore
 *.pyc

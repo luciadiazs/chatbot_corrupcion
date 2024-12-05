@@ -3,12 +3,9 @@
 
 # But do not ignore these directories and files
 !.gitattributes
-!.streamlit/
-!.streamlit/**
 !data/
 !data/**  # Ensure all subdirectories in data are not ignored
 !prueba.py
-!streamlit_app_pruebageo.py
 
 # Specifically ignore data/raw entirely
 data/raw/**

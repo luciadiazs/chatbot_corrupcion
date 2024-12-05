@@ -1,14 +1,29 @@
 # Ignore everything
 *
 
-# But do not ignore these directories and files
-!.gitattributes
+# Except these directories and files
+!src/
+!results/
+!docs/
+!paper/
 !data/
-!data/**  # Ensure all subdirectories in data are not ignored
-!prueba.py
+!.streamlit/
+.gitattributes
+!README.md
+!requirements.txt
+!.gitignore
+!streamlit_app.py
 
-# Specifically ignore data/raw entirely
-data/raw/**
+# Recursively allow files under the directories we don't ignore
+!src/**
+!results/**
+!docs/**
+!paper/**
+!data/**  # This line ensures all data is initially considered
+!.streamlit/**
+
+# Explicitly ignore all files in data/raw
+data/raw/**  # Ignore everything in the raw directory
 
 # Common files to ignore
 *.pyc
@@ -23,12 +38,10 @@ env.bak/
 venv.bak/
 .ipynb_checkpoints
 .DS_Store
+*.streamlit/secrets.toml
 
 # IDE specific files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Ignore Streamlit secrets
-.streamlit/secrets.toml

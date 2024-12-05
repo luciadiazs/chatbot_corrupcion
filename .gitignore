@@ -1,5 +1,5 @@
 # Ignore everything
-*
+
 
 # Except these directories and files
 !src/
@@ -23,7 +23,7 @@
 !.streamlit/**
 
 # Explicitly ignore all files in data/raw
-data/raw/**  # Ignore everything in the raw directory
+data/raw/**/**  # Ignore everything in the raw directory
 
 # Common files to ignore
 *.pyc

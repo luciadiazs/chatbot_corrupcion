@@ -32,3 +32,6 @@ venv.bak/
 .idea/
 *.swp
 *.swo
+
+# Ignore Streamlit secrets
+.streamlit/secrets.toml

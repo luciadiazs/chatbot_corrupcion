@@ -10,6 +10,8 @@ import folium
 from streamlit_folium import st_folium
 import unicodedata
 
+st.write(f"Directorio de trabajo actual: {os.getcwd()}")
+
 client = OpenAI(
   api_key=st.secrets['openai_key'],  # Poner Key
 )

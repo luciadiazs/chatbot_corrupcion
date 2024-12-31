@@ -18,7 +18,7 @@ client = OpenAI(
 st.set_page_config(page_title="Chatbot Corrupción 💬", layout="centered")
 
 with st.sidebar:
-    st.image(".streamlit/logo.png", use_column_width=True)
+    st.image(".streamlit/logo.png", use_container_width=True)
     st.title('Chatbot Corrupción')
     st.markdown('''
     ## Sobre este Chatbot
@@ -46,12 +46,12 @@ with st.sidebar:
 
 load_dotenv()
 
-def load_chunks_from_json(input_file='processed_data.json'):
+def load_chunks_from_json(input_file='data/processed/processed_data.json'):
     with open(input_file, 'r', encoding='utf-8') as f:
         docs_chunks = json.load(f)
     return docs_chunks
 
-docs_chunks = load_chunks_from_json('processed_data.json')
+docs_chunks = load_chunks_from_json('data/processed/processed_data.json')
 
 system_prompt = """
 Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Coloquialmente, la gente se referirá a estos como informes de corrupción, o información sobre corrupción. Responde a las preguntas basándote únicamente en los datos de los documentos proporcionados (Informes de Servicios de Control) de la Contraloría General de la República del Perú.

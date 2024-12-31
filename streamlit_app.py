@@ -46,7 +46,7 @@ with st.sidebar:
 
 load_dotenv()
 
-def load_chunks_from_json(input_file='data/processed/processed_data.json'):
+def load_chunks_from_json(input_file='/mount/src/chatbot_corrupcion/data/processed/processed_data.json'):
     # Construye la ruta completa basada en la ubicación del archivo actual
     base_path = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_path, input_file)
@@ -59,7 +59,7 @@ def load_chunks_from_json(input_file='data/processed/processed_data.json'):
     
     return docs_chunks
 
-docs_chunks = load_chunks_from_json('data/processed/processed_data.json')
+docs_chunks = load_chunks_from_json('/mount/src/chatbot_corrupcion/data/processed/processed_data.json')
 
 system_prompt = """
 Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Coloquialmente, la gente se referirá a estos como informes de corrupción, o información sobre corrupción. Responde a las preguntas basándote únicamente en los datos de los documentos proporcionados (Informes de Servicios de Control) de la Contraloría General de la República del Perú.

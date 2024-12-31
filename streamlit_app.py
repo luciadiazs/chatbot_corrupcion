@@ -47,13 +47,13 @@ with st.sidebar:
 load_dotenv()
 
 # Asegúrate de que esta definición esté antes de su llamada
-def load_chunks_from_json(input_file='matched_chunks.json'):
+def load_chunks_from_json(input_file='data/processed/matched_chunks.json'):
     with open(input_file, 'r', encoding='utf-8') as f:
         docs_chunks = json.load(f)
     return docs_chunks
 
 # Ahora puedes llamar a la función después de su definición
-docs_chunks = load_chunks_from_json('matched_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
+docs_chunks = load_chunks_from_json('data/processed/matched_chunks.json')  # Asegúrate de especificar la ruta correcta al archivo JSON
 
 system_prompt = """
 Eres un experto en informes de auditoría sobre corrupción en los gobiernos subnacionales de Perú. Coloquialmente, la gente se referirá a estos como informes de corrupción, o información sobre corrupción. Responde a las preguntas basándote únicamente en los datos de los documentos proporcionados (Informes de Servicios de Control) de la Contraloría General de la República del Perú.

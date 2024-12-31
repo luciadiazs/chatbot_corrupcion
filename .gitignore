@@ -14,7 +14,7 @@ misc
 !requirements.txt
 !.gitignore
 !streamlit_app.py
-!data/processed/.gitattributes
+!.gitattributes
 
 # Recursively allow files under the directories we don't ignore
 !src/**
@@ -48,3 +48,4 @@ venv.bak/
 .idea/
 *.swp
 *.swo
+/data

@@ -1,5 +1,5 @@
 # Ignore everything
-
+misc
 
 # Except these directories and files
 !src/
@@ -13,6 +13,7 @@
 !requirements.txt
 !.gitignore
 !streamlit_app.py
+!data/processed/.gitattributes
 
 # Recursively allow files under the directories we don't ignore
 !src/**
@@ -24,6 +25,7 @@
 
 # Explicitly ignore all files in data/raw
 data/raw/**/**  # Ignore everything in the raw directory
+data/raw/**/**
 
 # Common files to ignore
 *.pyc

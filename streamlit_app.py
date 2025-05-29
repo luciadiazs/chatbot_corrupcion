@@ -10,6 +10,7 @@ import folium
 from streamlit_folium import st_folium
 import unicodedata
 
+
 client = OpenAI(
   api_key=st.secrets['openai_key'],  # Poner Key
 )
@@ -147,19 +148,194 @@ def main():
             else:
                 st.error("No se pudo obtener una respuesta.")
 
-def find_relevant_chunks(question, docs_chunks, max_chunks=5):
-    question_keywords = set(re.findall(r'\w+', question.lower()))
+def normalize_text(text):
+    """Normaliza el texto a minúsculas y quita tildes."""
+    if not text:
+        return ""
+    text = str(text).lower()
+    # Quitar tildes
+    nfkd_form = unicodedata.normalize('NFKD', text)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+def extract_query_parameters(question):
+    """
+    Extrae año(s), regiones, provincias y distritos de la pregunta del usuario.
+    Retorna un diccionario con los parámetros encontrados.
+    """
+    params = {
+        "years": [],
+        "regions": [],
+        "provinces": [],
+        "districts": [],
+        "keywords": []
+    }
+    
+    normalized_question = normalize_text(question)
+
+    # Extraer años (2016-2022 como mencionaste)
+    # \b para asegurar que sean palabras completas (evitar parte de un número más largo)
+    params["years"] = re.findall(r'\b(201[6-9]|202[0-2])\b', normalized_question)
+    
+    # Palabras clave para identificar localidades (esto es una simplificación)
+    # Idealmente, tendrías listas de regiones, provincias, distritos válidos para una mejor extracción.
+    # O podrías usar NER si la pregunta es muy libre.
+    
+    # Ejemplo de palabras clave para regiones (deberías tener una lista más completa)
+    # Estas deberían ser normalizadas (minúsculas, sin tildes)
+    known_regions = ["lima", "loreto", "cajamarca", "cusco", "arequipa", "piura", "la libertad", "ancash", "junin", "puno", "lambayeque", "san martin"] # añadir más
+    known_provinces = ["alto amazonas", "cajamarca", "chiclayo", "sanchez carrion"] # añadir más
+    known_districts = ["yurimaguas", "jesus", "san bartolo", "miraflores", "san isidro"] # añadir más
+
+    words = re.findall(r'\b\w+\b', normalized_question)
+    
+    # Una heurística simple: si una palabra de la pregunta está en la lista de regiones/provincias/distritos
+    # Esta parte puede mejorarse mucho con listas más completas o técnicas de NLP.
+    # También considerar frases de varias palabras.
+    # Para mejorar, busca n-gramas.
+    
+    potential_locations = []
+    # Buscar n-gramas (hasta 3 palabras)
+    for n in range(3, 0, -1):
+        ngrams = [" ".join(words[i:i+n]) for i in range(len(words)-n+1)]
+        for ngram in ngrams:
+            if ngram in known_regions:
+                params["regions"].append(ngram)
+            elif ngram in known_provinces:
+                params["provinces"].append(ngram)
+            elif ngram in known_districts:
+                params["districts"].append(ngram)
+            # Eliminar las palabras del n-grama encontrado para no re-procesarlas
+            # (esto es una simplificación, podría necesitar lógica más robusta)
+
+    # Extraer palabras clave restantes (que no sean años ni localidades ya identificadas)
+    non_entity_words = normalized_question
+    for year in params["years"]:
+        non_entity_words = non_entity_words.replace(year, "")
+    for loc_list in [params["regions"], params["provinces"], params["districts"]]:
+        for loc in loc_list:
+            non_entity_words = non_entity_words.replace(loc, "")
+            
+    params["keywords"] = [kw for kw in re.findall(r'\b[a-z]{3,}\b', non_entity_words) 
+                          if kw not in ["de", "la", "el", "en", "y", "o", "del", "sobre", "informe", "reporte", "situacion", "caso", "casos", "corrupcion"]] # stopwords comunes
+
+    return params
+
+def find_relevant_chunks(question, all_docs_chunks, max_chunks=10):
+    """
+    Encuentra chunks relevantes:
+    1. Extrae parámetros (año, localidad) de la pregunta.
+    2. Pre-filtra chunks basados en estos parámetros.
+    3. Calcula un score de relevancia para los chunks pre-filtrados basado en palabras clave.
+    4. Devuelve los chunks más relevantes.
+    """
+    query_params = extract_query_parameters(question)
+    
+    # --- 1. Pre-filtrado basado en metadatos ---
+    pre_filtered_chunks = []
+    if not query_params["years"] and not query_params["regions"] and \
+       not query_params["provinces"] and not query_params["districts"]:
+        # Si no hay filtros de año/localidad en la pregunta, considerar todos los chunks para scoring
+        # O, si se prefiere, devolver una lista vacía y que el LLM diga que necesita más especificidad.
+        # Por ahora, pasaremos todos al scoring.
+        pre_filtered_chunks = all_docs_chunks
+    else:
+        for chunk in all_docs_chunks:
+            metadata = chunk.get("metadata", {})
+            
+            # Chequeo de Año del Informe
+            # (Podrías querer filtrar por 'periodo_inicio'/'periodo_fin' también o en su lugar)
+            year_match = True # Asume que coincide si no se especifica año en la pregunta
+            if query_params["years"]:
+                year_match = str(metadata.get("year", "")).strip() in query_params["years"]
+
+            # Chequeo de Localidad (Región, Provincia, Distrito)
+            # Normalizar también los metadatos para la comparación
+            region_meta = normalize_text(metadata.get("region", ""))
+            provincia_meta = normalize_text(metadata.get("provincia", ""))
+            distrito_meta = normalize_text(metadata.get("distrito", ""))
+            entidad_meta = normalize_text(metadata.get("entidad_auditada", ""))
+
+            location_match = True # Asume que coincide si no se especifica localidad
+            if query_params["regions"] or query_params["provinces"] or query_params["districts"]:
+                location_match = False # Requiere al menos un match si se especifica
+                if query_params["regions"] and any(q_reg in region_meta for q_reg in query_params["regions"]):
+                    location_match = True
+                if not location_match and query_params["provinces"] and any(q_prov in provincia_meta for q_prov in query_params["provinces"]):
+                    location_match = True
+                if not location_match and query_params["districts"] and any(q_dist in distrito_meta for q_dist in query_params["districts"]):
+                    location_match = True
+                # Opcional: buscar en entidad auditada si los otros no coinciden
+                if not location_match and (query_params["regions"] or query_params["provinces"] or query_params["districts"]) and \
+                   any(q_loc in entidad_meta for q_loc in query_params["regions"] + query_params["provinces"] + query_params["districts"]):
+                    location_match = True
+            
+            if year_match and location_match:
+                pre_filtered_chunks.append(chunk)
+        
+        # Si el pre-filtrado estricto no devuelve nada, pero hay palabras clave,
+        # podríamos considerar relajar y usar todos los chunks para el scoring de keywords.
+        # Pero para "formular informes", el pre-filtrado es importante.
+        if not pre_filtered_chunks and query_params["keywords"]:
+             # print("Prefiltrado no encontró chunks, usando todos para scoring de keywords.")
+             pass # O podrías decidir usar all_docs_chunks aquí si la pregunta es más general
+
+    # --- 2. Scoring de Relevancia por Palabras Clave (sobre los pre-filtrados o todos) ---
+    chunks_to_score = pre_filtered_chunks if pre_filtered_chunks else all_docs_chunks # Decide si usar todos si el prefiltrado es vacío
+    
+    if not chunks_to_score: # Si no hay chunks ni prefiltrados ni en total (improbable)
+        return []
+
     relevance_scores = []
+    question_norm_keywords = set(query_params["keywords"])
 
-    for chunk in docs_chunks:
-        # Combina el título y el contenido para la comparación
-        combined_text = (chunk["title"] + " " + chunk["content"]).lower()
-        chunk_keywords = set(re.findall(r'\w+', combined_text))
-        common_keywords = question_keywords.intersection(chunk_keywords)
-        relevance_scores.append((len(common_keywords), chunk))
+    for chunk_idx, chunk in enumerate(chunks_to_score):
+        metadata = chunk.get("metadata", {})
+        chunk_text_norm = normalize_text(chunk.get("chunk_text", ""))
+        titulo_norm = normalize_text(metadata.get("titulo_informe", ""))
+        entidad_norm = normalize_text(metadata.get("entidad_auditada", ""))
+        
+        # Texto combinado para scoring
+        combined_text_for_scoring = f"{chunk_text_norm} {titulo_norm} {entidad_norm}"
+        chunk_keywords = set(re.findall(r'\b[a-z]{3,}\b', combined_text_for_scoring)) # Palabras de al menos 3 letras
+        
+        common_keywords = question_norm_keywords.intersection(chunk_keywords)
+        score = len(common_keywords)
 
-    relevant_chunks = [chunk for _, chunk in sorted(relevance_scores, key=lambda x: x[0], reverse=True)]
-    return relevant_chunks[:max_chunks]
+        # Bonificaciones por tipo de chunk si la pregunta lo sugiere
+        source_field = chunk.get("source_field", "")
+        if source_field == "observacion" and ("corrupcion" in question_norm_keywords or \
+                                              "irregularidad" in question_norm_keywords or \
+                                              "hallazgo" in question_norm_keywords or \
+                                              "perjuicio" in question_norm_keywords):
+            score += 5 
+        if source_field == "objetivo" and "objetivo" in question_norm_keywords:
+            score += 2
+        if source_field == "recomendacion" and ("recomienda" in question_norm_keywords or "sugiere" in question_norm_keywords):
+            score += 2
+        
+        # Penalizar si el chunk es muy corto y no tiene muchos keywords comunes? (Opcional)
+        # if len(chunk_text_norm.split()) < 10 and score < 2:
+        #     score *= 0.5
+
+        relevance_scores.append({"score": score, "chunk": chunk, "original_index": chunk_idx})
+
+    # Ordenar por score, y luego por índice original para mantener estabilidad si los scores son iguales
+    relevant_chunks_sorted = sorted(relevance_scores, key=lambda x: (x["score"], -x["original_index"]), reverse=True)
+    
+    # Devolver los N chunks con mayor puntuación
+    final_chunks = [item["chunk"] for item in relevant_chunks_sorted[:max_chunks]]
+    
+    # Si después de todo no hay chunks relevantes (ej. score 0 para todos), devolver lista vacía.
+    if not any(item["score"] > 0 for item in relevant_chunks_sorted[:max_chunks]):
+        # Si la pregunta tenía filtros de año/localidad y no se encontraron, es mejor devolver vacío.
+        if query_params["years"] or query_params["regions"] or query_params["provinces"] or query_params["districts"]:
+            return [] 
+        # Si era una pregunta general sin filtros y aun así no hay score, quizás devolver los primeros N de all_docs_chunks.
+        # Por ahora, si no hay score, devolvemos vacío.
+        return []
+
+
+    return final_chunks
 
 def send_question_to_openai(question, docs_chunks, conversation_history):
     # Encuentra los chunks más relevantes para la pregunta

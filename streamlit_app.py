@@ -48,10 +48,34 @@ with st.sidebar:
 load_dotenv()
 
 # Asegúrate de que esta definición esté antes de su llamada
-def load_chunks_from_json(input_file='salida_chunks_final.jsonl'):
-    with open(input_file, 'r', encoding='utf-8') as f:
-        docs_chunks = json.load(f)
-    return docs_chunks
+
+def load_chunks_from_jsonl(input_file='salida_chunks_final.jsonl'): # Renombrado para claridad
+    docs_chunks_list = []
+    try:
+        with open(input_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                try:
+                    # Parsea cada línea como un objeto JSON individual
+                    chunk = json.loads(line.strip()) 
+                    docs_chunks_list.append(chunk)
+                except json.JSONDecodeError as e:
+                    print(f"Advertencia: Omitiendo línea malformada en '{input_file}': {line.strip()}")
+                    print(f"Error de decodificación: {e}")
+                    continue # Salta a la siguiente línea
+    except FileNotFoundError:
+        print(f"Error: El archivo '{input_file}' no fue encontrado.")
+        return [] # Devuelve lista vacía si el archivo no existe
+    except Exception as e:
+        print(f"Ocurrió un error inesperado al leer '{input_file}': {e}")
+        return []
+    return docs_chunks_list
+
+# En tu streamlit_app.py, cambia la llamada:
+# docs_chunks = load_chunks_from_json('salida_chunks_final.jsonl') # Línea antigua
+docs_chunks = load_chunks_from_jsonl('salida_chunks_final.jsonl') # Línea nueva y corregida
+
+
+
 
 # Ahora puedes llamar a la función después de su definición
 docs_chunks = load_chunks_from_json('salida_chunks_final.jsonl')  # Asegúrate de especificar la ruta correcta al archivo JSON

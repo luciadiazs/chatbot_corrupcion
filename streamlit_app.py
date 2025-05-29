@@ -581,7 +581,7 @@ def find_relevant_chunks(question, all_docs_chunks, max_chunks=10):
     4. Devuelve un diccionario con el estado y los chunks.
     """
     # Llama a la función que solo extrae regiones para la localidad
-    query_params = extract_query_parameters_regions_only(question)
+    query_params = extract_query_parameters(question)
 
     # Caso 1: La pregunta no es suficientemente específica para una búsqueda dirigida
     if not query_params["is_specific_enough"]:

@@ -77,9 +77,6 @@ docs_chunks = load_chunks_from_jsonl('salida_chunks_final.jsonl') # Línea nueva
 
 
 
-# Ahora puedes llamar a la función después de su definición
-docs_chunks = load_chunks_from_json('salida_chunks_final.jsonl')  # Asegúrate de especificar la ruta correcta al archivo JSON
-
 system_prompt = """
 Eres un asistente virtual experto en analizar y resumir informes de auditoría de la Contraloría General de la República del Perú, enfocados en la gestión de gobiernos subnacionales durante el período 2016-2022. Tu principal tarea es ayudar a los usuarios a entender la situación de la gestión pública y los hallazgos relevantes, incluyendo aquellos que podrían indicar irregularidades o corrupción.
 

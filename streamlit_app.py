@@ -390,7 +390,7 @@ def normalize_text(text):
 
     return params
 
-def extract_query_parameters_regions_only(question):
+def extract_query_parameters(question):
     """
     Extrae año(s), REGIONES y palabras clave de la pregunta del usuario.
     Retorna un diccionario con los parámetros encontrados.
